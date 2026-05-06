@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.1",
+  "id": "ci-cd/github-actions",
+  "name": "GitHub Actions",
+  "version": "1.0.0",
+  "status": "experimental",
+  "category": "ci-cd",
+  "description": "Detection rules for AI agents running inside or driving GitHub Actions workflows. Catches secret leakage in workflow logs, supply-chain attacks via untrusted action references, runner privilege escalation, and unauthorized release tagging.",
+  "license": "Apache-2.0",
+  "maintainers": ["@clampd/cicd-curators"],
+  "references": [
+    "https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions",
+    "https://owasp.org/www-project-top-10-ci-cd-security-risks/",
+    "https://slsa.dev/spec/v1.0/threats-overview"
+  ],
+
+  "sensitivity_default": "strict",
+  "sensitivity_profiles": {
+    "strict":     { "rule_score_floor": 0.5, "actions_promote": ["flag_to_block", "warn_to_flag"] },
+    "balanced":   { "rule_score_floor": 0.7 },
+    "permissive": { "rule_score_floor": 0.9 }
+  },
+
+  "overrideable": {
+    "rule_action": true,
+    "rule_score": true,
+    "exclude_rule_ids": true,
+    "fork_required_for": ["pattern", "scope_pattern"]
+  },
+
+  "rules": {
+    "rule_ids": ["R005", "R023", "R039", "R040", "R069", "R109", "R264", "R265", "R266"]
+  },
+
+  "keywords": {
+    "inline": [
+      { "keyword": "GITHUB_TOKEN",   "category": "secret", "risk_weight": 0.95 },
+      { "keyword": "ACTIONS_RUNTIME_TOKEN", "category": "secret", "risk_weight": 0.95 },
+      { "keyword": "::set-output",   "category": "exploit_signature", "risk_weight": 0.6 },
+      { "keyword": "::add-mask",     "category": "exploit_signature", "risk_weight": 0.7 },
+      { "keyword": "uses: actions/checkout@",   "category": "exploit_signature", "risk_weight": 0.3 },
+      { "keyword": "pull_request_target",       "category": "exploit_signature", "risk_weight": 0.85 },
+      { "keyword": "${{ github.event.issue.title }}", "category": "exploit_signature", "risk_weight": 0.8 },
+      { "keyword": "${{ github.event.pull_request.body }}", "category": "exploit_signature", "risk_weight": 0.8 }
+    ]
+  },
+
+  "demo_agents": [
+    {
+      "name": "github-actions-demo",
+      "purpose": "onboarding",
+      "description": "Throwaway demo for learning. NOT a production template — design your real CI agent's scopes around your actual repo + secret needs.",
+      "tags": ["demo", "ci-cd", "onboarding"],
+      "scopes": [
+        "scm:git:read",
+        "scm:git:write",
+        "exec:shell:run",
+        "net:http:outbound",
+        "fs:file:read",
+        "fs:file:write"
+      ],
+      "boundaries": {
+        "max_calls_per_minute": 30,
+        "max_calls_per_session": 200,
+        "auto_suspend_threshold": 0.75
+      },
+      "boundary_allowlist": [
+        { "category": "scm",  "subcategory": "git",  "pattern": "*" },
+        { "category": "exec", "subcategory": "shell", "pattern": "actions/*" },
+        { "category": "net",  "subcategory": "http", "pattern": "https://api.github.com/*" },
+        { "category": "net",  "subcategory": "http", "pattern": "https://*.githubusercontent.com/*" }
+      ],
+      "example_integration": {
+        "url": "https://github.com/clampd/bundles/tree/main/examples/ci-cd/github-actions",
+        "language": "yaml",
+        "estimated_setup_seconds": 60
+      }
+    }
+  ],
+
+  "protected_entities": [
+    { "type": "internal_path", "canonical": ".github/workflows/release.yml", "detection_method": "exact_match", "risk_class": "internal" },
+    { "type": "internal_path", "canonical": ".github/secrets/",              "detection_method": "pattern_match", "risk_class": "internal" }
+  ],
+
+  "policy_templates": [
+    {
+      "id": "github-actions-trusted-publisher",
+      "description": "Only allow release tagging from a workflow file in the trusted publisher path. Blocks AI agents creating ad-hoc release tags.",
+      "cedar_template": "permit(principal, action == Action::\"scm.git.write\", resource) when { resource.operation == \"tag_release\" && context.workflow_path == \"{{trusted_workflow_path}}\" };",
+      "parameters": [
+        { "name": "trusted_workflow_path", "type": "string", "required": true, "example": ".github/workflows/release.yml" }
+      ]
+    },
+    {
+      "id": "github-actions-no-third-party-actions",
+      "description": "Block any action reference outside an org-approved allowlist. Defeats supply-chain attacks via compromised third-party actions.",
+      "cedar_template": "forbid(principal, action == Action::\"exec.shell.run\", resource) when { resource.command like \"*uses:*\" && !(resource.command in {{allowed_action_orgs}}) };",
+      "parameters": [
+        { "name": "allowed_action_orgs", "type": "string[]", "required": true, "example": ["actions/", "your-org/"] }
+      ]
+    }
+  ],
+
+  "false_positives": [
+    {
+      "scenario": "Workflows that legitimately use ${{ github.event.pull_request.body }} for release notes — script-injection rule fires though intent is benign.",
+      "rule_id": "R264",
+      "remediation": "Allow only when the workflow file path matches your release-notes workflow, OR migrate to ${{ github.event.pull_request.title }} which is sanitized."
+    }
+  ],
+
+  "backtest_hints": {
+    "supported": true,
+    "expected_volume_per_day": 200,
+    "rule_ids_high_volume": ["R109", "R264"],
+    "min_sample_size": 50
+  }
+}

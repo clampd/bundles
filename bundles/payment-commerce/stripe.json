@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.1",
+  "id": "payment-commerce/stripe",
+  "name": "Stripe Payment Agent",
+  "version": "1.0.0",
+  "status": "experimental",
+  "category": "payment-commerce",
+  "description": "Detection rules + Cedar policy templates for AI agents that initiate Stripe charges, refunds, or transfers. Enforces per-transaction caps, recipient allowlists, mandate validation, and human-in-loop above thresholds.",
+  "license": "Apache-2.0",
+  "maintainers": ["@clampd/payment-curators"],
+  "references": [
+    "https://stripe.com/docs/security",
+    "https://stripe.com/docs/agentic-payments",
+    "https://www.pcisecuritystandards.org/document_library/"
+  ],
+
+  "sensitivity_default": "strict",
+  "sensitivity_profiles": {
+    "strict":     { "rule_score_floor": 0.4, "actions_promote": ["flag_to_block", "warn_to_flag"] },
+    "balanced":   { "rule_score_floor": 0.65 },
+    "permissive": { "rule_score_floor": 0.85 }
+  },
+
+  "overrideable": {
+    "rule_action": true,
+    "rule_score": false,
+    "exclude_rule_ids": false,
+    "fork_required_for": ["pattern", "scope_pattern", "rule_id_set"]
+  },
+
+  "rules": {
+    "rule_ids": ["R023", "R039", "R040", "R109"]
+  },
+
+  "keywords": {
+    "inline": [
+      { "keyword": "sk_live_",         "category": "secret", "risk_weight": 0.98 },
+      { "keyword": "rk_live_",         "category": "secret", "risk_weight": 0.98 },
+      { "keyword": "whsec_",           "category": "secret", "risk_weight": 0.95 },
+      { "keyword": "Stripe-Account",   "category": "sensitive_path", "risk_weight": 0.7 },
+      { "keyword": "transfer.create",  "category": "exploit_signature", "risk_weight": 0.85 },
+      { "keyword": "payouts.create",   "category": "exploit_signature", "risk_weight": 0.9 },
+      { "keyword": "refund.create",    "category": "exploit_signature", "risk_weight": 0.6 }
+    ]
+  },
+
+  "demo_agents": [
+    {
+      "name": "stripe-demo",
+      "purpose": "onboarding",
+      "description": "Throwaway demo for learning. NOT for production. Your real payment agent must use TEST keys in dev and have an explicit recipient allowlist with your verified vendors only.",
+      "tags": ["demo", "payment", "onboarding"],
+      "scopes": ["payment:transaction:create", "payment:transaction:read", "payment:refund:create"],
+      "boundaries": {
+        "max_calls_per_minute": 10,
+        "max_payment_per_tx_cents": 50000,
+        "max_payment_per_hour_cents": 500000,
+        "auto_suspend_threshold": 0.5
+      },
+      "boundary_allowlist": [
+        { "category": "payment", "subcategory": "transaction", "pattern": "test_*" }
+      ],
+      "example_integration": {
+        "url": "https://github.com/clampd/bundles/tree/main/examples/payment-commerce/stripe",
+        "language": "python",
+        "estimated_setup_seconds": 60
+      }
+    }
+  ],
+
+  "protected_entities": [
+    { "type": "wallet_address", "canonical": "acct_*",     "detection_method": "pattern_match", "risk_class": "financial" },
+    { "type": "api_endpoint",   "canonical": "api.stripe.com", "detection_method": "exact_match", "risk_class": "financial" }
+  ],
+
+  "policy_templates": [
+    {
+      "id": "stripe-tx-cap-per-payment",
+      "description": "Cap individual transaction amount. Defaults to your safest single-tx limit.",
+      "cedar_template": "forbid(principal, action == Action::\"payment.transaction.create\", resource) when { context.payment_amount_cents > {{max_tx_cents}} };",
+      "parameters": [
+        { "name": "max_tx_cents", "type": "integer", "required": true, "example": 50000, "description": "$500.00 default cap. Adjust per agent role." }
+      ]
+    },
+    {
+      "id": "stripe-recipient-allowlist",
+      "description": "Allow charges only to vendors in your verified-recipients list. Defeats AI agents being tricked into paying attacker-controlled accounts.",
+      "cedar_template": "permit(principal, action == Action::\"payment.transaction.create\", resource) when { context.payment_recipient in {{verified_recipients}} };",
+      "parameters": [
+        { "name": "verified_recipients", "type": "string[]", "required": true, "example": ["acct_vendor1", "acct_vendor2"] }
+      ]
+    },
+    {
+      "id": "stripe-human-in-loop-above-threshold",
+      "description": "Require human-in-loop confirmation for any transaction above a threshold.",
+      "cedar_template": "forbid(principal, action == Action::\"payment.transaction.create\", resource) when { context.payment_amount_cents > {{human_required_above_cents}} && context.human_present == false };",
+      "parameters": [
+        { "name": "human_required_above_cents", "type": "integer", "required": true, "example": 100000 }
+      ]
+    }
+  ],
+
+  "false_positives": [
+    {
+      "scenario": "A subscription billing agent legitimately runs charges every minute — R109 (rapid-fire) fires.",
+      "rule_id": "R109",
+      "remediation": "Tag the agent with 'subscription-biller' and add applies_to_tags exclusion on R109. Don't disable globally."
+    }
+  ],
+
+  "backtest_hints": {
+    "supported": true,
+    "expected_volume_per_day": 100,
+    "rule_ids_high_volume": ["R109"],
+    "min_sample_size": 30
+  }
+}

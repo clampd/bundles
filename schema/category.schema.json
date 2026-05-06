@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/clampd/bundles/schema/category.schema.json",
+  "title": "Clampd Bundle Category Defaults",
+  "description": "Per-category defaults that sibling bundles inherit unless they explicitly override the field. Place at bundles/<category>/_category.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "category_defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "license": { "const": "Apache-2.0" },
+        "maintainers": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^@[A-Za-z0-9_/-]+$" }
+        },
+        "sensitivity_default": { "enum": ["strict", "balanced", "permissive"] },
+        "references": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" }
+        }
+      }
+    },
+    "_inherits": { "const": "auto" }
+  },
+  "required": ["category_defaults", "_inherits"]
+}

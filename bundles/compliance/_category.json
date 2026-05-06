@@ -1,0 +1,14 @@
+{
+  "category_defaults": {
+    "license": "Apache-2.0",
+    "maintainers": ["@clampd/compliance-curators"],
+    "sensitivity_default": "strict",
+    "references": [
+      "https://www.hhs.gov/hipaa/for-professionals/index.html",
+      "https://gdpr.eu/",
+      "https://www.pcisecuritystandards.org/",
+      "https://artificialintelligenceact.eu/"
+    ]
+  },
+  "_inherits": "auto"
+}

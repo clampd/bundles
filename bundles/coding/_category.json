@@ -1,0 +1,12 @@
+{
+  "category_defaults": {
+    "license": "Apache-2.0",
+    "maintainers": ["@clampd/coding-curators"],
+    "sensitivity_default": "balanced",
+    "references": [
+      "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
+      "https://genai.owasp.org/llm-top-10/"
+    ]
+  },
+  "_inherits": "auto"
+}

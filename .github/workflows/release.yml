@@ -1,0 +1,44 @@
+name: Release Manifest
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  regenerate-manifest:
+    name: Regenerate manifest.json + tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_PAT }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install jsonschema==4.21.1
+      - run: python3 tools/validate.py
+
+      - name: Regenerate manifest
+        id: gen
+        run: |
+          python3 tools/gen-manifest.py
+          version=$(python3 -c "import json; print(json.load(open('manifest.json'))['manifest_version'])")
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Commit + tag if changed
+        run: |
+          git config user.name  "clampd-bot"
+          git config user.email "bot@clampd.dev"
+          if ! git diff --quiet manifest.json; then
+            git add manifest.json
+            git commit -m "manifest: regenerate to ${{ steps.gen.outputs.version }}"
+            git tag "manifest-${{ steps.gen.outputs.version }}"
+            git push origin main --tags
+          else
+            echo "manifest unchanged — skipping commit"
+          fi

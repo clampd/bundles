@@ -1,0 +1,75 @@
+name: Validate Bundles
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  schema-validation:
+    name: Schema + cross-checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install jsonschema==4.21.1
+
+      - name: Validate bundles
+        run: python3 tools/validate.py
+
+      - name: Verify manifest is fresh
+        run: |
+          cp manifest.json manifest.json.committed
+          python3 tools/gen-manifest.py
+          # Allow generated_at + manifest_version to differ; everything else must match
+          python3 -c "
+          import json
+          a = json.load(open('manifest.json.committed'))
+          b = json.load(open('manifest.json'))
+          for f in ('generated_at', 'manifest_version'):
+              a.pop(f, None); b.pop(f, None)
+          assert a == b, 'manifest.json is stale — run tools/gen-manifest.py and commit'
+          "
+
+      - name: Block status=stable on first PR
+        if: github.event_name == 'pull_request'
+        run: |
+          # Any bundle changing from non-existent to status=stable in this PR is rejected.
+          set -e
+          for f in $(git diff --name-only origin/main...HEAD -- 'bundles/*/*.json' | grep -v _category.json); do
+            if [ ! -f "$f" ]; then continue; fi
+            status=$(python3 -c "import json; print(json.load(open('$f'))['status'])")
+            if [ "$status" = "stable" ]; then
+              # Was it new in this PR?
+              if ! git cat-file -e origin/main:"$f" 2>/dev/null; then
+                echo "::error file=$f::New bundles must ship as status='experimental'. Promote later via separate PR."
+                exit 1
+              fi
+            fi
+          done
+
+  rule-id-existence:
+    name: rule_ids resolve in BUILTIN_RULES
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip — TODO wire up services repo lookup
+        run: |
+          echo "::warning::rule_id existence check not yet wired. Tracked in #56."
+          # Future: clone clampd/services, grep BUILTIN_RULES, fail if any rule_id missing.
+
+  cedar-template-compile:
+    name: Cedar policy templates compile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip — TODO wire up ag-policy
+        run: |
+          echo "::warning::Cedar template compile check not yet wired. Tracked in #56."
+          # Future: cargo install --git ... cedar-cli; iterate templates with parameters[].example values.

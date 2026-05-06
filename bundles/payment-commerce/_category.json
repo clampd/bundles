@@ -1,0 +1,12 @@
+{
+  "category_defaults": {
+    "license": "Apache-2.0",
+    "maintainers": ["@clampd/payment-curators"],
+    "sensitivity_default": "strict",
+    "references": [
+      "https://stripe.com/docs/security",
+      "https://www.pcisecuritystandards.org/document_library/"
+    ]
+  },
+  "_inherits": "auto"
+}

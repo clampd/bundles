@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.1",
+  "id": "coding/cursor",
+  "name": "Cursor IDE Agent",
+  "version": "1.0.0",
+  "status": "experimental",
+  "category": "coding",
+  "description": "Detection rules + keywords for the Cursor IDE agent: blocks secret leakage in completions, restricts file writes outside project root, and enforces git scope hygiene. Catches typical AI coding agent failure modes (committing .env, executing destructive shell, exfiltrating local files).",
+  "license": "Apache-2.0",
+  "maintainers": ["@clampd/coding-curators"],
+  "references": [
+    "https://docs.cursor.com/security",
+    "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
+    "https://genai.owasp.org/llmrisk/llm06-sensitive-information-disclosure/"
+  ],
+
+  "sensitivity_default": "balanced",
+  "sensitivity_profiles": {
+    "strict":     { "rule_score_floor": 0.6,  "actions_promote": ["flag_to_block"] },
+    "balanced":   { "rule_score_floor": 0.7 },
+    "permissive": { "rule_score_floor": 0.85, "actions_demote":  ["block_to_flag"] }
+  },
+
+  "overrideable": {
+    "rule_action": true,
+    "rule_score": true,
+    "exclude_rule_ids": true,
+    "fork_required_for": ["pattern", "scope_pattern"]
+  },
+
+  "rules": {
+    "rule_ids": [
+      "R001",
+      "R005",
+      "R023",
+      "R039",
+      "R040",
+      "R054",
+      "R061",
+      "R069",
+      "R109",
+      "R173"
+    ]
+  },
+
+  "keywords": {
+    "inline": [
+      { "keyword": "OPENAI_API_KEY",     "category": "secret", "risk_weight": 0.95, "lang": "en" },
+      { "keyword": "ANTHROPIC_API_KEY",  "category": "secret", "risk_weight": 0.95, "lang": "en" },
+      { "keyword": "GITHUB_TOKEN",       "category": "secret", "risk_weight": 0.95, "lang": "en" },
+      { "keyword": "AWS_SECRET_ACCESS_KEY", "category": "secret", "risk_weight": 0.95, "lang": "en" },
+      { "keyword": "STRIPE_SECRET_KEY",  "category": "secret", "risk_weight": 0.98, "lang": "en" },
+      { "keyword": ".env.local",         "category": "sensitive_path", "risk_weight": 0.85, "lang": "en" },
+      { "keyword": ".env.production",    "category": "sensitive_path", "risk_weight": 0.95, "lang": "en" },
+      { "keyword": "id_rsa",             "category": "sensitive_path", "risk_weight": 0.95, "lang": "en" },
+      { "keyword": "id_ed25519",         "category": "sensitive_path", "risk_weight": 0.95, "lang": "en" },
+      { "keyword": "rm -rf /",           "category": "dangerous_command", "risk_weight": 0.98, "lang": "en" },
+      { "keyword": "git push --force",   "category": "dangerous_command", "risk_weight": 0.75, "lang": "en" }
+    ]
+  },
+
+  "demo_agents": [
+    {
+      "name": "cursor-demo",
+      "purpose": "onboarding",
+      "description": "Throwaway demo agent for learning. NOT for production — create your real Cursor agent separately with your team's actual scope grants and project-specific allowlist patterns.",
+      "tags": ["demo", "coding", "onboarding"],
+      "scopes": [
+        "fs:file:read",
+        "fs:file:write",
+        "scm:git:read",
+        "scm:git:write",
+        "exec:shell:run"
+      ],
+      "boundaries": {
+        "max_calls_per_minute": 60,
+        "max_calls_per_session": 500,
+        "auto_suspend_threshold": 0.85
+      },
+      "boundary_allowlist": [
+        { "category": "fs",   "subcategory": "file", "pattern": "*" },
+        { "category": "scm",  "subcategory": "git",  "pattern": "*" },
+        { "category": "exec", "subcategory": "shell", "pattern": "git *" },
+        { "category": "exec", "subcategory": "shell", "pattern": "npm *" },
+        { "category": "exec", "subcategory": "shell", "pattern": "node *" }
+      ],
+      "example_integration": {
+        "url": "https://github.com/clampd/bundles/tree/main/examples/coding/cursor",
+        "language": "python",
+        "estimated_setup_seconds": 45
+      }
+    }
+  ],
+
+  "protected_entities": [
+    {
+      "type": "internal_path",
+      "canonical": ".env",
+      "detection_method": "exact_match",
+      "risk_class": "internal"
+    },
+    {
+      "type": "internal_path",
+      "canonical": ".aws/credentials",
+      "detection_method": "exact_match",
+      "risk_class": "internal"
+    },
+    {
+      "type": "internal_path",
+      "canonical": ".ssh/",
+      "detection_method": "pattern_match",
+      "risk_class": "internal"
+    }
+  ],
+
+  "policy_templates": [
+    {
+      "id": "cursor-fs-write-allowlist",
+      "description": "Allow file writes only inside the configured project root. Blocks Cursor from writing to /etc, ~/.ssh, or other sensitive paths.",
+      "cedar_template": "permit(principal, action == Action::\"fs.file.write\", resource) when { resource.path like \"{{project_root}}/*\" };",
+      "parameters": [
+        {
+          "name": "project_root",
+          "type": "string",
+          "required": true,
+          "example": "/workspaces/myrepo",
+          "description": "Absolute path of your repo root. Cursor file writes outside this directory will be denied."
+        }
+      ]
+    },
+    {
+      "id": "cursor-git-push-protection",
+      "description": "Require explicit human approval before any 'git push --force' command runs.",
+      "cedar_template": "forbid(principal, action == Action::\"exec.shell.run\", resource) when { resource.command like \"*git push --force*\" && context.human_present == false };",
+      "parameters": []
+    }
+  ],
+
+  "false_positives": [
+    {
+      "scenario": "Refactoring a file that legitimately mentions API_KEY in a string template — Cursor renames the variable across the codebase, R023 fires on every edit.",
+      "rule_id": "R023",
+      "remediation": "Add a project-specific exclusion for paths matching tests/**/*fixture* or examples/**, OR demote the rule action from 'block' to 'flag' in the sensitivity dial."
+    },
+    {
+      "scenario": "Cursor proposes 'rm -rf node_modules && npm install' as a fix for a broken dependency — R109 (dangerous command) fires though intent is benign.",
+      "rule_id": "R109",
+      "remediation": "Allow 'rm -rf node_modules' specifically via boundary_allowlist exec:shell entry, OR keep the block and have Cursor accept the friction (better default)."
+    }
+  ],
+
+  "backtest_hints": {
+    "supported": true,
+    "expected_volume_per_day": 500,
+    "rule_ids_high_volume": ["R023", "R109"],
+    "min_sample_size": 100
+  }
+}

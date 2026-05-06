@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.1",
+  "id": "compliance/hipaa",
+  "name": "HIPAA (US)",
+  "version": "1.0.0",
+  "status": "experimental",
+  "category": "compliance",
+  "description": "Tags Clampd rules to HIPAA Privacy + Security Rule controls. Adds the 18 HIPAA-defined PHI identifiers as protected entities. Surfaces a HIPAA-aligned audit view on the dashboard. NOT a substitute for a real HIPAA audit — provides detection coverage for AI agents handling PHI.",
+  "license": "Apache-2.0",
+  "maintainers": ["@clampd/compliance-curators"],
+  "references": [
+    "https://www.hhs.gov/hipaa/for-professionals/privacy/index.html",
+    "https://www.hhs.gov/hipaa/for-professionals/security/index.html",
+    "https://www.hhs.gov/hipaa/for-professionals/privacy/special-topics/de-identification/index.html"
+  ],
+
+  "sensitivity_default": "strict",
+  "sensitivity_profiles": {
+    "strict":     { "rule_score_floor": 0.5, "actions_promote": ["flag_to_block"] },
+    "balanced":   { "rule_score_floor": 0.7 },
+    "permissive": { "rule_score_floor": 0.85 }
+  },
+
+  "overrideable": {
+    "rule_action": false,
+    "rule_score": false,
+    "exclude_rule_ids": true,
+    "fork_required_for": ["pattern", "scope_pattern", "rule_id_set"]
+  },
+
+  "rules": {
+    "rule_ids": ["R023", "R039", "R040", "R005"]
+  },
+
+  "keywords": {
+    "inline": [
+      { "keyword": "diagnosis", "category": "compliance_term", "risk_weight": 0.7 },
+      { "keyword": "medical record number", "category": "compliance_term", "risk_weight": 0.85 },
+      { "keyword": "MRN:", "category": "compliance_term", "risk_weight": 0.85 },
+      { "keyword": "ICD-10", "category": "compliance_term", "risk_weight": 0.7 },
+      { "keyword": "Patient Health Information", "category": "compliance_term", "risk_weight": 0.85 },
+      { "keyword": "PHI", "category": "compliance_term", "risk_weight": 0.6 },
+      { "keyword": "covered entity", "category": "compliance_term", "risk_weight": 0.5 },
+      { "keyword": "business associate agreement", "category": "compliance_term", "risk_weight": 0.6 }
+    ]
+  },
+
+  "demo_agents": [
+    {
+      "name": "hipaa-demo",
+      "purpose": "onboarding",
+      "description": "Throwaway demo agent for learning HIPAA detection. NOT a production HIPAA-compliant config — real PHI handling needs a signed BAA with your provider, audit logging configured, and your full risk assessment.",
+      "tags": ["demo", "compliance", "hipaa", "onboarding"],
+      "scopes": ["llm:input:write", "llm:output:read"],
+      "boundaries": {
+        "max_calls_per_minute": 30,
+        "auto_suspend_threshold": 0.6
+      },
+      "boundary_allowlist": [],
+      "example_integration": {
+        "url": "https://github.com/clampd/bundles/tree/main/examples/compliance/hipaa",
+        "language": "python",
+        "estimated_setup_seconds": 60
+      }
+    }
+  ],
+
+  "protected_entities": [
+    { "type": "phone_number",  "canonical": "+1-###-###-####", "detection_method": "pattern_match", "risk_class": "internal" },
+    { "type": "phone_number", "canonical": "###-##-####", "detection_method": "pattern_match", "risk_class": "internal" }
+  ],
+
+  "policy_templates": [
+    {
+      "id": "hipaa-deny-phi-to-third-party",
+      "description": "Block any LLM output containing PHI patterns from being sent to non-allowlisted external destinations. Aligns with HIPAA §164.502(b) minimum necessary.",
+      "cedar_template": "forbid(principal, action == Action::\"net.http.outbound\", resource) when { context.pii_in_response == true && !(resource.host in {{baa_allowlist}}) };",
+      "parameters": [
+        { "name": "baa_allowlist", "type": "string[]", "required": true, "example": ["api.openai.com-baa.example.com"], "description": "Hostnames covered by signed BAAs. Restrict to ONLY these." }
+      ]
+    },
+    {
+      "id": "hipaa-require-audit-log",
+      "description": "Require detailed audit logging on any agent in a HIPAA scope. Aligns with HIPAA §164.312(b).",
+      "cedar_template": "forbid(principal, action == Action::\"llm.input.write\", resource) when { context.scan_layers_skipped contains \"shadow\" };",
+      "parameters": []
+    }
+  ],
+
+  "false_positives": [
+    {
+      "scenario": "A medical research agent legitimately processes de-identified PHI (per HIPAA §164.514) — the bundle still flags terms like 'diagnosis' or 'ICD-10'.",
+      "rule_id": "R039",
+      "remediation": "Tag the agent with 'deidentified-research' and add an applies_to_tags exclusion. Verify the de-identification was done properly per Safe Harbor or Expert Determination."
+    }
+  ],
+
+  "backtest_hints": {
+    "supported": true,
+    "expected_volume_per_day": 200,
+    "rule_ids_high_volume": ["R039"],
+    "min_sample_size": 50
+  }
+}

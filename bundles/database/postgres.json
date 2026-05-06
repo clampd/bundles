@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.1",
+  "id": "database/postgres",
+  "name": "PostgreSQL Query Agent",
+  "version": "1.0.0",
+  "status": "experimental",
+  "category": "database",
+  "description": "Detection rules for AI agents executing SQL against PostgreSQL: blocks bulk SELECT * dumps, schema-mutation outside migrations, role/grant escalation, and unparameterized injection. Includes per-tool record-count caps via the boundary system.",
+  "license": "Apache-2.0",
+  "maintainers": ["@clampd/database-curators"],
+  "references": [
+    "https://www.postgresql.org/docs/current/security.html",
+    "https://owasp.org/www-community/attacks/SQL_Injection",
+    "https://genai.owasp.org/llmrisk/llm06-sensitive-information-disclosure/"
+  ],
+
+  "sensitivity_default": "balanced",
+  "sensitivity_profiles": {
+    "strict":     { "rule_score_floor": 0.55, "actions_promote": ["flag_to_block"] },
+    "balanced":   { "rule_score_floor": 0.7 },
+    "permissive": { "rule_score_floor": 0.85, "actions_demote":  ["block_to_flag"] }
+  },
+
+  "overrideable": {
+    "rule_action": true,
+    "rule_score": true,
+    "exclude_rule_ids": true,
+    "fork_required_for": ["pattern", "scope_pattern"]
+  },
+
+  "rules": {
+    "rule_ids": ["R001", "R002", "R005", "R006", "R007", "R008", "R039", "R046"]
+  },
+
+  "keywords": {
+    "inline": [
+      { "keyword": "DROP TABLE",       "category": "dangerous_command", "risk_weight": 0.95 },
+      { "keyword": "TRUNCATE TABLE",   "category": "dangerous_command", "risk_weight": 0.9 },
+      { "keyword": "GRANT ALL",        "category": "dangerous_command", "risk_weight": 0.9 },
+      { "keyword": "ALTER ROLE",       "category": "dangerous_command", "risk_weight": 0.85 },
+      { "keyword": "pg_read_server_files",  "category": "exploit_signature", "risk_weight": 0.95 },
+      { "keyword": "pg_ls_dir",        "category": "exploit_signature", "risk_weight": 0.85 },
+      { "keyword": "COPY FROM PROGRAM", "category": "exploit_signature", "risk_weight": 0.98 },
+      { "keyword": "lo_import",        "category": "exploit_signature", "risk_weight": 0.85 },
+      { "keyword": "current_setting",  "category": "sensitive_path", "risk_weight": 0.6 },
+      { "keyword": "pg_user",          "category": "sensitive_path", "risk_weight": 0.7 }
+    ]
+  },
+
+  "demo_agents": [
+    {
+      "name": "postgres-demo",
+      "purpose": "onboarding",
+      "description": "Throwaway demo for learning. NOT for production — your real DB agent should have specific tables in the allowlist, not '*'.",
+      "tags": ["demo", "database", "onboarding"],
+      "scopes": ["db:query:read", "db:query:write", "db:schema:read"],
+      "boundaries": {
+        "max_records_per_query": 1000,
+        "max_calls_per_minute": 60,
+        "max_data_volume_mb_per_hour": 100,
+        "auto_suspend_threshold": 0.85
+      },
+      "boundary_allowlist": [
+        { "category": "db", "subcategory": "query",  "pattern": "*" },
+        { "category": "db", "subcategory": "schema", "pattern": "public.*" }
+      ],
+      "example_integration": {
+        "url": "https://github.com/clampd/bundles/tree/main/examples/database/postgres",
+        "language": "python",
+        "estimated_setup_seconds": 45
+      }
+    }
+  ],
+
+  "protected_entities": [
+    { "type": "internal_path", "canonical": "pg_authid",   "detection_method": "exact_match", "risk_class": "internal" },
+    { "type": "internal_path", "canonical": "pg_shadow",   "detection_method": "exact_match", "risk_class": "internal" }
+  ],
+
+  "policy_templates": [
+    {
+      "id": "postgres-row-cap-per-query",
+      "description": "Cap result rows per SELECT to your configured max. Defeats bulk-dump exfiltration.",
+      "cedar_template": "permit(principal, action == Action::\"db.query.read\", resource) when { context.row_count <= {{max_rows_per_query}} };",
+      "parameters": [
+        { "name": "max_rows_per_query", "type": "integer", "required": true, "example": 1000 }
+      ]
+    },
+    {
+      "id": "postgres-schema-write-via-migrations-only",
+      "description": "Require schema mutations to come from the configured migration runner, not ad-hoc agent calls.",
+      "cedar_template": "permit(principal, action == Action::\"db.schema.write\", resource) when { context.client_fingerprint == \"{{migration_runner_fingerprint}}\" };",
+      "parameters": [
+        { "name": "migration_runner_fingerprint", "type": "string", "required": true, "example": "drizzle-kit:1.x" }
+      ]
+    }
+  ],
+
+  "false_positives": [
+    {
+      "scenario": "A reporting agent legitimately runs SELECT * on a small table for ETL — R002 fires because of the wildcard projection.",
+      "rule_id": "R002",
+      "remediation": "Either rewrite to enumerate columns explicitly (best practice), or whitelist the specific reporting agent via tags + applies_to_tags."
+    }
+  ],
+
+  "backtest_hints": {
+    "supported": true,
+    "expected_volume_per_day": 5000,
+    "rule_ids_high_volume": ["R001", "R002"],
+    "min_sample_size": 200
+  }
+}

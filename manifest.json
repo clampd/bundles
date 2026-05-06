@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.1",
+  "manifest_version": "2026-05-05.2",
+  "generated_at": "2026-05-05T20:33:27.180699+00:00",
+  "bundles": [
+    {
+      "id": "ci-cd/github-actions",
+      "version": "1.0.0",
+      "status": "experimental",
+      "category": "ci-cd",
+      "path": "bundles/ci-cd/github-actions.json",
+      "sha256": "76cec50f2f0a7cf6abe1efa74bd855f123934c3796bb48f64c7457b5bbaa6cf9",
+      "has_example": true
+    },
+    {
+      "id": "coding/cursor",
+      "version": "1.0.0",
+      "status": "experimental",
+      "category": "coding",
+      "path": "bundles/coding/cursor.json",
+      "sha256": "dee57b66fba5bc62670dcae271eea5369d0a49fd4b638ce152b6e1704b37b2ab",
+      "has_example": true
+    },
+    {
+      "id": "compliance/hipaa",
+      "version": "1.0.0",
+      "status": "experimental",
+      "category": "compliance",
+      "path": "bundles/compliance/hipaa.json",
+      "sha256": "01d010284e1d25f4a09675b0f46930aaf997a388a17160da31172226298c5c54",
+      "has_example": true
+    },
+    {
+      "id": "database/postgres",
+      "version": "1.0.0",
+      "status": "experimental",
+      "category": "database",
+      "path": "bundles/database/postgres.json",
+      "sha256": "426b5e59674bb777edfe9a4c2b61ad14e70ff4efed78bd9ca9758866e192cc41",
+      "has_example": true
+    },
+    {
+      "id": "payment-commerce/stripe",
+      "version": "1.0.0",
+      "status": "experimental",
+      "category": "payment-commerce",
+      "path": "bundles/payment-commerce/stripe.json",
+      "sha256": "ce603c3910d6bcee3334d97a918f7f9344718f1b128f7c398fd1f2e45797d0cd",
+      "has_example": true
+    }
+  ]
+}

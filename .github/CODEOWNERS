@@ -1,0 +1,38 @@
+# Per-category ownership. PRs touching a directory route to that team.
+# Format: <pattern> <space> <owner1> [<owner2> ...]
+
+# Schema + tools — repo maintainers only
+/schema/                @clampd/bundles-maintainers
+/tools/                 @clampd/bundles-maintainers
+/.github/               @clampd/bundles-maintainers
+/manifest.json          @clampd/bundles-maintainers
+
+# Per-category curators
+/bundles/coding/            @clampd/coding-curators
+/bundles/ci-cd/             @clampd/cicd-curators
+/bundles/browser/           @clampd/browser-curators
+/bundles/database/          @clampd/database-curators
+/bundles/devops/            @clampd/devops-curators
+/bundles/email-comms/       @clampd/comms-curators
+/bundles/customer-support/  @clampd/support-curators
+/bundles/payment-commerce/  @clampd/payment-curators
+/bundles/rag-research/      @clampd/rag-curators
+/bundles/ml-model/          @clampd/ml-curators
+/bundles/web3-defi/         @clampd/web3-curators
+/bundles/multi-agent/       @clampd/multi-agent-curators
+/bundles/compliance/        @clampd/compliance-curators
+
+# Examples follow the same category split
+/examples/coding/           @clampd/coding-curators
+/examples/ci-cd/            @clampd/cicd-curators
+/examples/browser/          @clampd/browser-curators
+/examples/database/         @clampd/database-curators
+/examples/devops/           @clampd/devops-curators
+/examples/email-comms/      @clampd/comms-curators
+/examples/customer-support/ @clampd/support-curators
+/examples/payment-commerce/ @clampd/payment-curators
+/examples/rag-research/     @clampd/rag-curators
+/examples/ml-model/         @clampd/ml-curators
+/examples/web3-defi/        @clampd/web3-curators
+/examples/multi-agent/      @clampd/multi-agent-curators
+/examples/compliance/       @clampd/compliance-curators

@@ -1,0 +1,12 @@
+{
+  "category_defaults": {
+    "license": "Apache-2.0",
+    "maintainers": ["@clampd/cicd-curators"],
+    "sensitivity_default": "strict",
+    "references": [
+      "https://owasp.org/www-project-top-10-ci-cd-security-risks/",
+      "https://slsa.dev/spec/v1.0/threats-overview"
+    ]
+  },
+  "_inherits": "auto"
+}
