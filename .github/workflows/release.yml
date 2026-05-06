@@ -40,5 +40,5 @@ jobs:
             git tag "manifest-${{ steps.gen.outputs.version }}"
             git push origin main --tags
           else
-            echo "manifest unchanged — skipping commit"
+            echo "manifest unchanged - skipping commit"
           fi

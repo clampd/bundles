@@ -34,7 +34,7 @@ jobs:
           b = json.load(open('manifest.json'))
           for f in ('generated_at', 'manifest_version'):
               a.pop(f, None); b.pop(f, None)
-          assert a == b, 'manifest.json is stale — run tools/gen-manifest.py and commit'
+          assert a == b, 'manifest.json is stale - run tools/gen-manifest.py and commit'
           "
 
       - name: Block status=stable on first PR
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Skip — TODO wire up services repo lookup
+      - name: Skip - TODO wire up services repo lookup
         run: |
           echo "::warning::rule_id existence check not yet wired. Tracked in #56."
           # Future: clone clampd/services, grep BUILTIN_RULES, fail if any rule_id missing.
@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Skip — TODO wire up ag-policy
+      - name: Skip - TODO wire up ag-policy
         run: |
           echo "::warning::Cedar template compile check not yet wired. Tracked in #56."
           # Future: cargo install --git ... cedar-cli; iterate templates with parameters[].example values.

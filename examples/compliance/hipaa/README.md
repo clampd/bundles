@@ -1,4 +1,4 @@
-# HIPAA — Runnable Example
+# HIPAA - Runnable Example
 
 > **DEMO ONLY**. This does NOT make your stack HIPAA-compliant. Real HIPAA needs a signed BAA, full risk assessment, and your audit-log retention configured.
 

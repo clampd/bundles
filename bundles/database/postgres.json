@@ -51,7 +51,7 @@
     {
       "name": "postgres-demo",
       "purpose": "onboarding",
-      "description": "Throwaway demo for learning. NOT for production — your real DB agent should have specific tables in the allowlist, not '*'.",
+      "description": "Throwaway demo for learning. NOT for production - your real DB agent should have specific tables in the allowlist, not '*'.",
       "tags": ["demo", "database", "onboarding"],
       "scopes": ["db:query:read", "db:query:write", "db:schema:read"],
       "boundaries": {
@@ -98,7 +98,7 @@
 
   "false_positives": [
     {
-      "scenario": "A reporting agent legitimately runs SELECT * on a small table for ETL — R002 fires because of the wildcard projection.",
+      "scenario": "A reporting agent legitimately runs SELECT * on a small table for ETL - R002 fires because of the wildcard projection.",
       "rule_id": "R002",
       "remediation": "Either rewrite to enumerate columns explicitly (best practice), or whitelist the specific reporting agent via tags + applies_to_tags."
     }

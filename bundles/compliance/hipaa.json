@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "status": "experimental",
   "category": "compliance",
-  "description": "Tags Clampd rules to HIPAA Privacy + Security Rule controls. Adds the 18 HIPAA-defined PHI identifiers as protected entities. Surfaces a HIPAA-aligned audit view on the dashboard. NOT a substitute for a real HIPAA audit — provides detection coverage for AI agents handling PHI.",
+  "description": "Tags Clampd rules to HIPAA Privacy + Security Rule controls. Adds the 18 HIPAA-defined PHI identifiers as protected entities. Surfaces a HIPAA-aligned audit view on the dashboard. NOT a substitute for a real HIPAA audit - provides detection coverage for AI agents handling PHI.",
   "license": "Apache-2.0",
   "maintainers": ["@clampd/compliance-curators"],
   "references": [
@@ -49,7 +49,7 @@
     {
       "name": "hipaa-demo",
       "purpose": "onboarding",
-      "description": "Throwaway demo agent for learning HIPAA detection. NOT a production HIPAA-compliant config — real PHI handling needs a signed BAA with your provider, audit logging configured, and your full risk assessment.",
+      "description": "Throwaway demo agent for learning HIPAA detection. NOT a production HIPAA-compliant config - real PHI handling needs a signed BAA with your provider, audit logging configured, and your full risk assessment.",
       "tags": ["demo", "compliance", "hipaa", "onboarding"],
       "scopes": ["llm:input:write", "llm:output:read"],
       "boundaries": {
@@ -89,7 +89,7 @@
 
   "false_positives": [
     {
-      "scenario": "A medical research agent legitimately processes de-identified PHI (per HIPAA §164.514) — the bundle still flags terms like 'diagnosis' or 'ICD-10'.",
+      "scenario": "A medical research agent legitimately processes de-identified PHI (per HIPAA §164.514) - the bundle still flags terms like 'diagnosis' or 'ICD-10'.",
       "rule_id": "R039",
       "remediation": "Tag the agent with 'deidentified-research' and add an applies_to_tags exclusion. Verify the de-identification was done properly per Safe Harbor or Expert Determination."
     }

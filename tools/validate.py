@@ -13,8 +13,8 @@ Checks:
   5. rule_ids look syntactically valid (R001-R9999)
   6. demo_agent name ends in '-demo'
   7. Every bundle has a corresponding examples/<id>/ directory
-  8. (TODO) Cedar policy templates compile with default parameters — needs ag-policy
-  9. (TODO) rule_ids exist in BUILTIN_RULES — needs services repo
+  8. (TODO) Cedar policy templates compile with default parameters - needs ag-policy
+  9. (TODO) rule_ids exist in BUILTIN_RULES - needs services repo
 """
 
 import json
@@ -48,7 +48,7 @@ def load_json(path: Path) -> dict | None:
     try:
         return json.loads(path.read_text())
     except json.JSONDecodeError as e:
-        err(f"{path.relative_to(REPO)}: invalid JSON — {e}")
+        err(f"{path.relative_to(REPO)}: invalid JSON - {e}")
         return None
 
 
@@ -128,9 +128,9 @@ def main() -> int:
     # Summary
     print()
     if errors:
-        print(f"FAIL — {len(errors)} error(s)")
+        print(f"FAIL - {len(errors)} error(s)")
         return 1
-    print(f"OK — {len(bundle_files)} bundle(s) validated")
+    print(f"OK - {len(bundle_files)} bundle(s) validated")
     return 0
 
 

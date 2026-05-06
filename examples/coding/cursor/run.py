@@ -1,5 +1,5 @@
 """
-Cursor IDE Agent — Clampd Demo
+Cursor IDE Agent - Clampd Demo
 
 Demonstrates the coding/cursor bundle by simulating 3 file-write requests
 through Clampd: 2 should pass, 1 should get blocked. Run, then check the
@@ -39,7 +39,7 @@ def main() -> int:
     parser.add_argument("--fixture", default="default", choices=list(SCENARIOS.keys()))
     args = parser.parse_args()
 
-    print(f"=== Clampd Cursor Demo — fixture: {args.fixture} ===\n")
+    print(f"=== Clampd Cursor Demo - fixture: {args.fixture} ===\n")
 
     # Wrap the OpenAI client so all calls flow through Clampd
     client = clampd.openai(OpenAI(), agent_id=AGENT_ID, base_url=GATEWAY, api_key=API_KEY)

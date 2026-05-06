@@ -49,7 +49,7 @@
     {
       "name": "github-actions-demo",
       "purpose": "onboarding",
-      "description": "Throwaway demo for learning. NOT a production template — design your real CI agent's scopes around your actual repo + secret needs.",
+      "description": "Throwaway demo for learning. NOT a production template - design your real CI agent's scopes around your actual repo + secret needs.",
       "tags": ["demo", "ci-cd", "onboarding"],
       "scopes": [
         "scm:git:read",
@@ -104,7 +104,7 @@
 
   "false_positives": [
     {
-      "scenario": "Workflows that legitimately use ${{ github.event.pull_request.body }} for release notes — script-injection rule fires though intent is benign.",
+      "scenario": "Workflows that legitimately use ${{ github.event.pull_request.body }} for release notes - script-injection rule fires though intent is benign.",
       "rule_id": "R264",
       "remediation": "Allow only when the workflow file path matches your release-notes workflow, OR migrate to ${{ github.event.pull_request.title }} which is sanitized."
     }

@@ -1,4 +1,4 @@
-# Stripe Payment Agent — Runnable Example
+# Stripe Payment Agent - Runnable Example
 
 > **DEMO**. Use Stripe TEST keys only (sk_test_*). The bundle blocks live keys for the demo agent.
 

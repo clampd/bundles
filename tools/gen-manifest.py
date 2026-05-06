@@ -64,7 +64,7 @@ def main() -> int:
         "bundles": bundles,
     }
     MANIFEST_PATH.write_text(json.dumps(manifest, indent=2) + "\n")
-    print(f"wrote manifest.json with {len(bundles)} bundle(s) — version {manifest['manifest_version']}")
+    print(f"wrote manifest.json with {len(bundles)} bundle(s) - version {manifest['manifest_version']}")
     return 0
 
 

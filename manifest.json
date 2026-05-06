@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
-  "manifest_version": "2026-05-06.2",
-  "generated_at": "2026-05-06T09:44:30.820505+00:00",
+  "manifest_version": "2026-05-06.3",
+  "generated_at": "2026-05-06T09:52:07.424618+00:00",
   "bundles": [
     {
       "id": "ci-cd/github-actions",
@@ -9,7 +9,7 @@
       "status": "experimental",
       "category": "ci-cd",
       "path": "bundles/ci-cd/github-actions.json",
-      "sha256": "8e817a95563f5759e38cf85fc5eba461886551bb1644a8c9d7e85a3de24d25cb",
+      "sha256": "158900104efb63853afe4a1cf3e848db7bfa2f890dae8049662a64cfaf5d1128",
       "has_example": true
     },
     {
@@ -18,7 +18,7 @@
       "status": "experimental",
       "category": "coding",
       "path": "bundles/coding/cursor.json",
-      "sha256": "dee57b66fba5bc62670dcae271eea5369d0a49fd4b638ce152b6e1704b37b2ab",
+      "sha256": "df2c0b46b5b67566c605eae69b1e108ccded1ed75bf41be9f08b8b10de4990f5",
       "has_example": true
     },
     {
@@ -27,7 +27,7 @@
       "status": "experimental",
       "category": "compliance",
       "path": "bundles/compliance/hipaa.json",
-      "sha256": "01d010284e1d25f4a09675b0f46930aaf997a388a17160da31172226298c5c54",
+      "sha256": "a1006058e3476c5360da0f01d3879a5b857e657912157c376d21a563807f7619",
       "has_example": true
     },
     {
@@ -36,7 +36,7 @@
       "status": "experimental",
       "category": "database",
       "path": "bundles/database/postgres.json",
-      "sha256": "426b5e59674bb777edfe9a4c2b61ad14e70ff4efed78bd9ca9758866e192cc41",
+      "sha256": "8ac18ca365e0722db69bccb2666d66931d303f0d4a6f0b97f82215a64a7db42c",
       "has_example": true
     },
     {
@@ -45,7 +45,7 @@
       "status": "experimental",
       "category": "payment-commerce",
       "path": "bundles/payment-commerce/stripe.json",
-      "sha256": "ce603c3910d6bcee3334d97a918f7f9344718f1b128f7c398fd1f2e45797d0cd",
+      "sha256": "0a4d8e980dd8d0fd6a3462cda6a75d4ff8d99011fb9462366260b94f941bb5c6",
       "has_example": true
     }
   ]

@@ -1,4 +1,4 @@
-# GitHub Actions — Runnable Example
+# GitHub Actions - Runnable Example
 
 > **DEMO**. Helps you see Clampd catching CI agent failure modes. Don't ship this workflow to production unchanged.
 

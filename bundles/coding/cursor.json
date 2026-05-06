@@ -63,7 +63,7 @@
     {
       "name": "cursor-demo",
       "purpose": "onboarding",
-      "description": "Throwaway demo agent for learning. NOT for production — create your real Cursor agent separately with your team's actual scope grants and project-specific allowlist patterns.",
+      "description": "Throwaway demo agent for learning. NOT for production - create your real Cursor agent separately with your team's actual scope grants and project-specific allowlist patterns.",
       "tags": ["demo", "coding", "onboarding"],
       "scopes": [
         "fs:file:read",
@@ -138,12 +138,12 @@
 
   "false_positives": [
     {
-      "scenario": "Refactoring a file that legitimately mentions API_KEY in a string template — Cursor renames the variable across the codebase, R023 fires on every edit.",
+      "scenario": "Refactoring a file that legitimately mentions API_KEY in a string template - Cursor renames the variable across the codebase, R023 fires on every edit.",
       "rule_id": "R023",
       "remediation": "Add a project-specific exclusion for paths matching tests/**/*fixture* or examples/**, OR demote the rule action from 'block' to 'flag' in the sensitivity dial."
     },
     {
-      "scenario": "Cursor proposes 'rm -rf node_modules && npm install' as a fix for a broken dependency — R109 (dangerous command) fires though intent is benign.",
+      "scenario": "Cursor proposes 'rm -rf node_modules && npm install' as a fix for a broken dependency - R109 (dangerous command) fires though intent is benign.",
       "rule_id": "R109",
       "remediation": "Allow 'rm -rf node_modules' specifically via boundary_allowlist exec:shell entry, OR keep the block and have Cursor accept the friction (better default)."
     }

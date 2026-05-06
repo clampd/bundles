@@ -102,7 +102,7 @@
 
   "false_positives": [
     {
-      "scenario": "A subscription billing agent legitimately runs charges every minute — R109 (rapid-fire) fires.",
+      "scenario": "A subscription billing agent legitimately runs charges every minute - R109 (rapid-fire) fires.",
       "rule_id": "R109",
       "remediation": "Tag the agent with 'subscription-biller' and add applies_to_tags exclusion on R109. Don't disable globally."
     }

@@ -221,7 +221,7 @@
             "type": "array",
             "items": { "type": "string", "pattern": "^[a-z]+:[a-z]+:[a-z]+$" },
             "minItems": 1,
-            "description": "category:subcategory:action — must match scope_categories enum."
+            "description": "category:subcategory:action - must match scope_categories enum."
           },
           "boundaries": {
             "type": "object",

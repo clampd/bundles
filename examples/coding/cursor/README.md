@@ -1,13 +1,13 @@
-# Cursor IDE Agent — Runnable Example
+# Cursor IDE Agent - Runnable Example
 
-> **This is a DEMO**. It exists to help you see Clampd in action. Don't ship this code to production — write your own integration once you understand the flow.
+> **This is a DEMO**. It exists to help you see Clampd in action. Don't ship this code to production - write your own integration once you understand the flow.
 
 ## What this shows
 
 Three things, in 45 seconds:
 1. A simulated Cursor agent makes 3 file-write requests through Clampd
 2. Two requests succeed (writing to project root)
-3. One request gets blocked (writing to `~/.ssh/authorized_keys`) — Clampd alert visible in dashboard
+3. One request gets blocked (writing to `~/.ssh/authorized_keys`) - Clampd alert visible in dashboard
 
 ## Prerequisites
 
@@ -32,7 +32,7 @@ Expected output:
 ```
 [1/3] write README.md to project root          → ALLOWED  (200 OK)
 [2/3] write src/auth.py to project root        → ALLOWED  (200 OK)
-[3/3] write ~/.ssh/authorized_keys             → BLOCKED  (403 — boundary_allowlist + R109)
+[3/3] write ~/.ssh/authorized_keys             → BLOCKED  (403 - boundary_allowlist + R109)
 ```
 
 Open your dashboard → Audit page → see the blocked request with full reason chain.

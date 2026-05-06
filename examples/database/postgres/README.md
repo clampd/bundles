@@ -1,4 +1,4 @@
-# PostgreSQL Query Agent — Runnable Example
+# PostgreSQL Query Agent - Runnable Example
 
 > **DEMO**. Throwaway code to see Clampd guarding DB queries.
 
