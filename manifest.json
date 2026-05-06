@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
-  "manifest_version": "2026-05-06.3",
-  "generated_at": "2026-05-06T09:52:07.424618+00:00",
+  "manifest_version": "2026-05-06.4",
+  "generated_at": "2026-05-06T09:53:27.475591+00:00",
   "bundles": [
     {
       "id": "ci-cd/github-actions",
