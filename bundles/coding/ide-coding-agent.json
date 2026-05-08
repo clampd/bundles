@@ -1,15 +1,15 @@
 {
   "schema_version": "1.1",
-  "id": "coding/cursor",
-  "name": "Cursor IDE Agent",
-  "version": "1.0.0",
+  "id": "coding/ide-coding-agent",
+  "name": "AI Coding Agent",
+  "version": "1.1.0",
   "status": "experimental",
   "category": "coding",
-  "description": "Detection rules + keywords for the Cursor IDE agent: blocks secret leakage in completions, restricts file writes outside project root, and enforces git scope hygiene. Catches typical AI coding agent failure modes (committing .env, executing destructive shell, exfiltrating local files).",
+  "description": "Detection rules + keywords for AI coding agents running through clampd-guard. Works with Cursor, Claude Code, Continue, Aider, and any other IDE agent that hooks into clampd-guard's pre/post-tool-call interceptor. Blocks secret leakage in completions, restricts file writes outside the project root, and enforces git push hygiene. Catches typical coding-agent failure modes (committing .env, executing destructive shell, exfiltrating local files).",
   "license": "Apache-2.0",
   "maintainers": ["@clampd/coding-curators"],
   "references": [
-    "https://docs.cursor.com/security",
+    "https://github.com/clampd/services/tree/master/crates/clampd-guard",
     "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
     "https://genai.owasp.org/llmrisk/llm06-sensitive-information-disclosure/"
   ],
@@ -61,9 +61,9 @@
 
   "demo_agents": [
     {
-      "name": "cursor-demo",
+      "name": "ide-coding-agent-demo",
       "purpose": "onboarding",
-      "description": "Throwaway demo agent for learning. NOT for production - create your real Cursor agent separately with your team's actual scope grants and project-specific allowlist patterns.",
+      "description": "Throwaway demo agent for learning. Install clampd-guard in your IDE (`clampd-guard install claude` or `clampd-guard install cursor`), point it at this agent's secret, then your IDE's tool calls flow through Clampd before execution. NOT for production - create your real coding agent separately with your team's actual scope grants and project-specific allowlist patterns.",
       "tags": ["demo", "coding", "onboarding"],
       "scopes": [
         "fs:file:read",
@@ -85,7 +85,7 @@
         { "category": "exec", "subcategory": "shell", "pattern": "node *" }
       ],
       "example_integration": {
-        "url": "https://github.com/clampd/bundles/tree/main/examples/coding/cursor",
+        "url": "https://github.com/clampd/bundles/tree/main/examples/coding/ide-coding-agent",
         "language": "python",
         "estimated_setup_seconds": 45
       }
@@ -115,8 +115,8 @@
 
   "policy_templates": [
     {
-      "id": "cursor-fs-write-allowlist",
-      "description": "Allow file writes only inside the configured project root. Blocks Cursor from writing to /etc, ~/.ssh, or other sensitive paths.",
+      "id": "fs-write-allowlist",
+      "description": "Allow file writes only inside the configured project root. Blocks the coding agent from writing to /etc, ~/.ssh, or other sensitive paths.",
       "cedar_template": "permit(principal, action == Action::\"fs.file.write\", resource) when { resource.path like \"{{project_root}}/*\" };",
       "parameters": [
         {
@@ -124,12 +124,12 @@
           "type": "string",
           "required": true,
           "example": "/workspaces/myrepo",
-          "description": "Absolute path of your repo root. Cursor file writes outside this directory will be denied."
+          "description": "Absolute path of your repo root. File writes outside this directory will be denied."
         }
       ]
     },
     {
-      "id": "cursor-git-push-protection",
+      "id": "git-push-protection",
       "description": "Require explicit human approval before any 'git push --force' command runs.",
       "cedar_template": "forbid(principal, action == Action::\"exec.shell.run\", resource) when { resource.command like \"*git push --force*\" && context.human_present == false };",
       "parameters": []
@@ -138,14 +138,14 @@
 
   "false_positives": [
     {
-      "scenario": "Refactoring a file that legitimately mentions API_KEY in a string template - Cursor renames the variable across the codebase, R023 fires on every edit.",
+      "scenario": "Refactoring a file that legitimately mentions API_KEY in a string template - the agent renames the variable across the codebase, R023 fires on every edit.",
       "rule_id": "R023",
       "remediation": "Add a project-specific exclusion for paths matching tests/**/*fixture* or examples/**, OR demote the rule action from 'block' to 'flag' in the sensitivity dial."
     },
     {
-      "scenario": "Cursor proposes 'rm -rf node_modules && npm install' as a fix for a broken dependency - R109 (dangerous command) fires though intent is benign.",
+      "scenario": "The agent proposes 'rm -rf node_modules && npm install' as a fix for a broken dependency - R109 (dangerous command) fires though intent is benign.",
       "rule_id": "R109",
-      "remediation": "Allow 'rm -rf node_modules' specifically via boundary_allowlist exec:shell entry, OR keep the block and have Cursor accept the friction (better default)."
+      "remediation": "Allow 'rm -rf node_modules' specifically via boundary_allowlist exec:shell entry, OR keep the block and have the agent accept the friction (better default)."
     }
   ],
 
