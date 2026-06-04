@@ -1,15 +1,15 @@
 {
   "schema_version": "1.1",
-  "manifest_version": "2026-06-04.2",
-  "generated_at": "2026-06-04T15:01:31.891598+00:00",
+  "manifest_version": "2026-06-04.3",
+  "generated_at": "2026-06-04T15:25:39.064167+00:00",
   "bundles": [
     {
       "id": "ci-cd/github-actions",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "experimental",
       "category": "ci-cd",
       "path": "bundles/ci-cd/github-actions.json",
-      "sha256": "158900104efb63853afe4a1cf3e848db7bfa2f890dae8049662a64cfaf5d1128",
+      "sha256": "4eeac7d3caa30343c9afaa730953c15b569681b80ff05478dd8c267c96f09b02",
       "has_example": true
     },
     {

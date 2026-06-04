@@ -2,7 +2,7 @@
   "schema_version": "1.1",
   "id": "ci-cd/github-actions",
   "name": "GitHub Actions",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "status": "experimental",
   "category": "ci-cd",
   "description": "Detection rules for AI agents running inside or driving GitHub Actions workflows. Catches secret leakage in workflow logs, supply-chain attacks via untrusted action references, runner privilege escalation, and unauthorized release tagging.",
@@ -76,6 +76,15 @@
         "estimated_setup_seconds": 60
       }
     }
+  ],
+
+  "default_agent_scopes": [
+    "scm:git:read",
+    "scm:git:write",
+    "exec:shell:run",
+    "net:http:outbound",
+    "fs:file:read",
+    "fs:file:write"
   ],
 
   "protected_entities": [
