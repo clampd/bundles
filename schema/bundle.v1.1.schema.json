@@ -269,6 +269,12 @@
       }
     },
 
+    "default_agent_scopes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z]+:[a-z]+:[a-z]+$" },
+      "description": "Scopes applied as the org's default for agents that self-enroll without explicit scopes (enroll defaults). The dashboard writes these to organizations.default_agent_scopes when the bundle is enabled, so on-call agents inherit them."
+    },
+
     "protected_entities": {
       "type": "array",
       "items": {

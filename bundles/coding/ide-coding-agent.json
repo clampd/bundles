@@ -2,7 +2,7 @@
   "schema_version": "1.1",
   "id": "coding/ide-coding-agent",
   "name": "AI Coding Agent",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "status": "experimental",
   "category": "coding",
   "description": "Detection rules + keywords for AI coding agents running through clampd-guard. Works with Cursor, Claude Code, Continue, Aider, and any other IDE agent that hooks into clampd-guard's pre/post-tool-call interceptor. Blocks secret leakage in completions, restricts file writes outside the project root, and enforces git push hygiene. Catches typical coding-agent failure modes (committing .env, executing destructive shell, exfiltrating local files).",
@@ -66,11 +66,14 @@
       "description": "Throwaway demo agent for learning. Install clampd-guard in your IDE (`clampd-guard install claude` or `clampd-guard install cursor`), point it at this agent's secret, then your IDE's tool calls flow through Clampd before execution. NOT for production - create your real coding agent separately with your team's actual scope grants and project-specific allowlist patterns.",
       "tags": ["demo", "coding", "onboarding"],
       "scopes": [
+        "exec:shell:run",
+        "exec:code:run",
         "fs:file:read",
         "fs:file:write",
+        "net:http:read",
         "scm:git:read",
         "scm:git:write",
-        "exec:shell:run"
+        "db:query:read"
       ],
       "boundaries": {
         "max_calls_per_minute": 60,
@@ -80,9 +83,17 @@
       "boundary_allowlist": [
         { "category": "fs",   "subcategory": "file", "pattern": "*" },
         { "category": "scm",  "subcategory": "git",  "pattern": "*" },
+        { "category": "net",  "subcategory": "http", "pattern": "*" },
+        { "category": "db",   "subcategory": "query", "pattern": "*" },
+        { "category": "exec", "subcategory": "code",  "pattern": "*" },
         { "category": "exec", "subcategory": "shell", "pattern": "git *" },
         { "category": "exec", "subcategory": "shell", "pattern": "npm *" },
-        { "category": "exec", "subcategory": "shell", "pattern": "node *" }
+        { "category": "exec", "subcategory": "shell", "pattern": "node *" },
+        { "category": "exec", "subcategory": "shell", "pattern": "python *" },
+        { "category": "exec", "subcategory": "shell", "pattern": "pip *" },
+        { "category": "exec", "subcategory": "shell", "pattern": "cargo *" },
+        { "category": "exec", "subcategory": "shell", "pattern": "make *" },
+        { "category": "exec", "subcategory": "shell", "pattern": "pytest *" }
       ],
       "example_integration": {
         "url": "https://github.com/clampd/bundles/tree/main/examples/coding/ide-coding-agent",
@@ -90,6 +101,17 @@
         "estimated_setup_seconds": 45
       }
     }
+  ],
+
+  "default_agent_scopes": [
+    "exec:shell:run",
+    "exec:code:run",
+    "fs:file:read",
+    "fs:file:write",
+    "net:http:read",
+    "scm:git:read",
+    "scm:git:write",
+    "db:query:read"
   ],
 
   "protected_entities": [
